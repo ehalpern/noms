@@ -5,6 +5,7 @@
 package types
 
 import (
+	"fmt"
 	"github.com/attic-labs/noms/go/d"
 	"github.com/attic-labs/noms/go/hash"
 	"github.com/attic-labs/noms/go/util/orderedparallel"
@@ -33,10 +34,16 @@ type metaTuple struct {
 
 func (mt metaTuple) getChildSequence(vr ValueReader) sequence {
 	if mt.child != nil {
+		//fmt.Fprintf(os.Stderr, "traversing child %s\n", mt.toString())
+		// NOTE: Vicinity of prefetch, probably higher.
 		return mt.child.sequence()
 	}
 
 	return mt.ref.TargetValue(vr).(Collection).sequence()
+}
+
+func (mt *metaTuple) toString() string {
+	return fmt.Sprintf("Type: %T, Ref: %s, %d , Leaves: %d, Key: %v", mt, EncodedValue(mt.ref), mt.ref.height, mt.numLeaves, mt.key.v)
 }
 
 // orderedKey is a key in a Prolly Tree level, which is a metaTuple in a metaSequence, or a value in a leaf sequence.
@@ -115,6 +122,8 @@ func (ms metaSequence) getCompareFn(other sequence) compareFn {
 
 // sequence interface
 func (ms metaSequence) getItem(idx int) sequenceItem {
+	// TODO trace
+	//fmt.Fprintf(os.Stderr, "metSequence.getItem(%d)\n", idx)
 	return ms.tuples[idx]
 }
 
@@ -143,6 +152,7 @@ func (ms metaSequence) numLeaves() uint64 {
 // metaSequence interface
 func (ms metaSequence) getChildSequence(idx int) sequence {
 	mt := ms.tuples[idx]
+	//fmt.Fprintf(os.Stderr, "Get child %d, t = %s\n", idx, mt.toString())
 	return mt.getChildSequence(ms.vr)
 }
 

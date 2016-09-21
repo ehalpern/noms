@@ -4,7 +4,10 @@
 
 package types
 
-import "github.com/attic-labs/noms/go/d"
+import (
+	"fmt"
+	"github.com/attic-labs/noms/go/d"
+)
 
 // sequenceCursor explores a tree of sequence items.
 type sequenceCursor struct {
@@ -38,6 +41,7 @@ func (cur *sequenceCursor) sync() {
 }
 
 func (cur *sequenceCursor) getChildSequence() sequence {
+	// NOTE: vicinity of prefetch
 	return cur.seq.getChildSequence(cur.idx)
 }
 
@@ -72,17 +76,25 @@ func (cur *sequenceCursor) advanceMaybeAllowPastEnd(allowPastEnd bool) bool {
 		return true
 	}
 	if cur.idx == cur.length() {
+//		fmt.Fprintf(os.Stderr, "advance at end: %s", cur.String())
 		return false
 	}
+	//fmt.Fprintf(os.Stderr, "past end %s\n", cur.String())
 	if cur.parent != nil && cur.parent.advanceMaybeAllowPastEnd(false) {
+		// at end of current leaf chunk and there are more
 		cur.sync()
 		cur.idx = 0
 		return true
 	}
 	if allowPastEnd {
 		cur.idx++
+		//fmt.Fprintf(os.Stderr, "past end allowed: %s", cur.String())
 	}
 	return false
+}
+
+func (cur *sequenceCursor) String() string {
+	return fmt.Sprintf("Len: %d, Leaves: %d, Idx: %d, Type: %d", cur.seq.seqLen(), cur.seq.numLeaves(), cur.idx, cur.seq.Type().Desc.Kind())
 }
 
 func (cur *sequenceCursor) retreat() bool {

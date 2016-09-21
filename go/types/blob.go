@@ -240,6 +240,8 @@ func readBlob(r io.Reader, vrw ValueReadWriter) Blob {
 	chunkBytes := chunkBuff[:]
 	rv := newRollingValueHasher()
 	offset := 0
+
+	// Add byte chunk. Return true when chunk is full
 	addByte := func(b byte) bool {
 		if offset >= len(chunkBytes) {
 			tmp := make([]byte, len(chunkBytes)*2)

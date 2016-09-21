@@ -1,0 +1,49 @@
+ldb->ldb
+
+$ time noms sync $local::fire $local2::fire
+Done - Synced 129 MB in 16.72s (7.7 MB/s)
+
+real   	0m16.903s
+user   	0m21.408s
+sys    	0m2.617s
+
+ldb->http
+
+$ time noms sync $local::fire http://localhost:8000::fire
+Done - Synced 127 MB in 21.98s (5.8 MB/s)
+
+real   	0m22.051s
+user   	0m20.635s
+sys    	0m3.836s
+
+export from ldb
+
+$ time csv-export $local::fire > local.fire.csv
+
+real   	0m3.567s
+user   	0m6.559s
+sys    	0m0.545s
+
+export from http
+
+$ time csv-export http://localhost:8000::fire > localr.fire.csv
+
+real   	0m9.941s
+user   	0m10.310s
+sys    	0m1.377s
+
+import to ldb
+
+$ time csv-import local.fire.csv $local::fire-import
+
+real   	0m3.084s
+user   	0m5.207s
+sys    	0m0.348s
+
+import to http
+
+$ time csv-import local.fire.csv http://localhost:8000::fire-import
+
+real   	0m6.267s
+user   	0m5.566s
+sys    	0m0.594s
