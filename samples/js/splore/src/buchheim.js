@@ -27,6 +27,7 @@ export type NodeData = {
   isOpen?: boolean,
   canOpen?: boolean,
   hash?: Hash,
+  detailContent?: Promise<string>,
 };
 
 export type NodeGraph = {

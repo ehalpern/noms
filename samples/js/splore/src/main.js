@@ -190,15 +190,16 @@ function handleChunkLoad(hash: Hash, val: any, fromHash: ?string) {
       const mirror = new StructMirror(val);
       const structName = mirror.name || 'Struct';
       data.nodes[id] = {name: structName};
-
       mirror.forEachField((f: StructFieldMirror) => {
         const v = f.value;
         const kid = process(hash, f.name, id);
         if (kid) {
           // Start struct keys open, just makes it easier to use.
           data.nodes[kid].isOpen = true;
-
           process(hash, v, kid);
+          if (structName == "Photo" && f.name == "sizes") {
+            data.nodes[id].detailContent = getPhotoPopupImage(v)
+          }
         } else {
           throw new Error('No kid id.');
         }
@@ -211,9 +212,28 @@ function handleChunkLoad(hash: Hash, val: any, fromHash: ?string) {
     return id;
   }
 
+  async function getPhotoPopupImage(map: Map): Promise<string> {
+    const MinSize = 256 * 256
+    let minURL: string
+    let minSize = Number.MAX_SAFE_INTEGER
+    await map.forEach((v, k) => {
+      const s = new StructMirror(k);
+      const w = String(s.get('width'))
+      const h = String(s.get('height'))
+      let curSize = w * h
+      if (curSize >= MinSize && curSize < minSize) {
+        minURL = String(v)
+        minSize = curSize
+      }
+    });
+    return minURL;
+  }
+
   process(hash, val, fromHash);
   render();
 }
+
+
 
 function handleNodeClick(e: MouseEvent, id: string) {
   if (e.button === 0 && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
@@ -221,7 +241,10 @@ function handleNodeClick(e: MouseEvent, id: string) {
   }
 
   if (id.indexOf('/') > -1) {
-    if (data.links[id] && data.links[id].length > 0) {
+    if (e.metaKey && data.nodes[id].name == "Photo") {
+      data.nodes[id].showPopup = true;
+      render()
+    } else if (data.links[id] && data.links[id].length > 0) {
       data.nodes[id].isOpen = !data.nodes[id].isOpen;
       render();
     }

@@ -22,11 +22,13 @@ type Props = {
   hash: ?Hash,
   db: string,
   onClick: (e: MouseEvent, s: String) => void,
+  detailContent: ?Promise<string>,
 };
 
 type State = {
   x: number,
   y: number,
+  detail: string,
 };
 
 export default class Node extends React.Component<void, Props, State> {
@@ -38,7 +40,14 @@ export default class Node extends React.Component<void, Props, State> {
     this.state = {
       x: this.props.fromX,
       y: this.props.fromY,
+      detail: null,
     };
+
+    if (props.detailContent != null) {
+      props.detailContent.then((v) => {
+        this.setState({detail: v});
+      })
+    }
   }
 
   render(): React.Element<any> {
@@ -71,16 +80,26 @@ export default class Node extends React.Component<void, Props, State> {
       fontFamily: '"Menlo", monospace',
     };
 
+    const popoverStyle = {
+      width: 'auto',
+      height: 'auto',
+      maxWidth: '200px',
+      maxHeight: '200px',
+      visibility: 'hidden'
+    }
+
     return (
       <g className='node' onClick={this.props.onClick} style={{transform:translate}}>
         {this.getShape()}
+        {this.getDetailPopover()}
         <foreignObject style={foreignObjStyle} x={-this.props.spaceX + 10} y='-.35em'
-          width={this.props.spaceX - 20} height='0.7em'>
+                       width={this.props.spaceX - 20} height='0.7em'>
           <div title={this.props.title || this.props.text} style={paraStyle}>{text}</div>
         </foreignObject>
       </g>
     );
   }
+
 
   getShape() : React.Element<any> {
     const className = classNames('icon', {open:this.props.isOpen});
@@ -96,5 +115,17 @@ export default class Node extends React.Component<void, Props, State> {
             ry='1.35'/>;
     }
     throw new Error('unreachable');
+  }
+
+  getDetailPopover() : React.Element<any> {
+    if (this.state.detail == null) {
+      return null;
+    } else {
+      return (
+        <foreignObject className='foreign' width="200px" height="200px">
+          <img src={this.state.detail} alt="photo" className='popover'/>
+        </foreignObject>
+      )
+    }
   }
 }

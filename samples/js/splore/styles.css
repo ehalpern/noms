@@ -44,3 +44,22 @@ a:hover {
 	stroke: #ccc;
 	stroke-width: 1.5px;
 }
+
+.foreign {
+	overflow: visible
+}
+
+.popover {
+	width: auto;
+	height: auto;
+	maxWidth: 200px;
+	maxHeight: 200px;
+	visibility: hidden;
+}
+
+.icon:hover ~ .foreign .popover {
+	visibility: visible;
+	opacity: 1;
+}
+
+

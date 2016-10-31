@@ -57,7 +57,10 @@ export default function Layout(props: Props) : React.Element<any> {
         isOpen={!hasChildren || Boolean(treeNode.data.isOpen)}
         hash={hash}
         db={props.db}
-        onClick={(e) => props.onNodeClick(e, treeNode.id)}/>);
+        onClick={(e) => props.onNodeClick(e, treeNode.id)}
+        detailContent={treeNode.data.detailContent}
+      />
+    );
     children.push(n);
     lookup[treeNode.id] = treeNode;
 
